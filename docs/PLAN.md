@@ -8,7 +8,7 @@
 
 **Tech Stack:** Ruby 3.x · Rails 8.x · PostgreSQL · Solid Queue/Cache/Cable · Turbo · Stimulus · Tailwind (`tailwindcss-rails`) · `importmap-rails` · RSpec · FactoryBot · Capybara · Cuprite · WebMock · VCR · Shoulda Matchers · SimpleCov · RuboCop · Brakeman · `nanoid` · `rack-attack`.
 
-**Branching:** Each phase ships as a PR off `main` so reviewers see logical chunks. Commit per task; one PR per phase. CI must be green before merging each PR.
+**Branching:** Solo project — commit per task directly to `main` and push frequently. Phase markers below are organizational, not branch boundaries. Keep CI green between tasks; if a commit lands red, fix-forward in the next commit rather than reverting.
 
 ---
 
@@ -410,7 +410,7 @@ git add -A
 git commit -m "ui: minimal Tailwind layout shell"
 ```
 
-**End of Phase 0** — open PR `phase-0-bootstrap`. Merge after CI passes.
+**End of Phase 0** — push commits, verify CI green.
 
 ---
 
@@ -738,7 +738,7 @@ git add -A
 git commit -m "test: factories for ShortLink and Click"
 ```
 
-**End of Phase 1** — open PR `phase-1-models`.
+**End of Phase 1** — push, verify CI green.
 
 ---
 
@@ -1178,7 +1178,7 @@ git add -A
 git commit -m "feat(service): GeolocationService with cache, private-IP shortcut, graceful fallback"
 ```
 
-**End of Phase 2** — open PR `phase-2-services`.
+**End of Phase 2** — push, verify CI green.
 
 ---
 
@@ -1378,7 +1378,7 @@ git add -A
 git commit -m "feat(job): RecordClickJob with geo lookup + salted IP hash"
 ```
 
-**End of Phase 3** — open PR `phase-3-jobs`.
+**End of Phase 3** — push, verify CI green.
 
 ---
 
@@ -1520,7 +1520,7 @@ git add -A
 git commit -m "feat(query): RecentClicksQuery"
 ```
 
-**End of Phase 4** — open PR `phase-4-queries`.
+**End of Phase 4** — push, verify CI green.
 
 ---
 
@@ -1695,7 +1695,7 @@ git add -A
 git commit -m "feat(presenters): ShortLinkPresenter + ClickPresenter for view formatting"
 ```
 
-**End of Phase 5** — open PR `phase-5-presenters`.
+**End of Phase 5** — push, verify CI green.
 
 ---
 
@@ -1845,7 +1845,7 @@ class ShortLinksController < ApplicationController
 end
 ```
 
-Views referenced (`new.html.erb`, `create.turbo_stream.erb`, `create_error.turbo_stream.erb`, `create_collision_exhausted.turbo_stream.erb`) are added in Phase 7. The request spec for now only asserts response semantics that hold once views exist — so Phase 6 commits will have failing system-level views; we land them in 7 before merging the umbrella PR.
+Views referenced (`new.html.erb`, `create.turbo_stream.erb`, `create_error.turbo_stream.erb`, `create_collision_exhausted.turbo_stream.erb`) are added in Phase 7. The request specs in this phase will be red until Phase 7 lands the missing views; the controller code stands on its own and the spec failures will say "missing template," which is the expected interim state. Land Phase 7 before declaring the feature done.
 
 - [ ] **Step 3: Commit**
 
@@ -2026,7 +2026,7 @@ git add -A
 git commit -m "ui: branded 404 page"
 ```
 
-**End of Phase 6** — note Phase 7 must follow before this PR is mergeable (views referenced by ShortLinksController don't exist yet). Either open a combined Phase 6+7 PR or hold Phase 6 PR until 7 lands.
+**End of Phase 6** — request specs that depend on Phase 7 views will be red. That's expected. Push the commits anyway and proceed directly into Phase 7; CI will go green once Phase 7 is done.
 
 ---
 
@@ -2345,7 +2345,7 @@ git add -A
 git commit -m "test(system): golden-path shortening flow with Turbo Stream broadcast"
 ```
 
-**End of Phase 7** — open umbrella PR `phase-6-7-controllers-views`.
+**End of Phase 7** — push, verify CI green (Phase 6 request specs should now pass too).
 
 ---
 
@@ -2478,7 +2478,7 @@ git add -A
 git commit -m "security: CSP + Referrer-Policy + nosniff + HSTS in prod"
 ```
 
-**End of Phase 8** — open PR `phase-8-security`.
+**End of Phase 8** — push, verify CI green.
 
 ---
 
@@ -2674,7 +2674,7 @@ git add -A
 git commit -m "docs: wiki + backlog + README"
 ```
 
-**End of Phase 9** — open PR `phase-9-docs`.
+**End of Phase 9** — push, verify CI green.
 
 ---
 
