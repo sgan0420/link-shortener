@@ -1,0 +1,14 @@
+# Inherit Rails' Omakase config (the team default from Basecamp).
+# https://github.com/rails/rubocop-rails-omakase
+inherit_gem:
+  rubocop-rails-omakase: rubocop.yml
+
+AllCops:
+  SuggestExtensions: false
+  Exclude:
+    - "bin/**/*"
+    - "db/schema.rb"
+    - "db/*_schema.rb"
+    - "vendor/**/*"
+    - "node_modules/**/*"
+    - "tmp/**/*"
