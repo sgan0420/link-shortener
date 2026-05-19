@@ -15,9 +15,9 @@
 default: &default
   adapter: postgresql
   encoding: unicode
-  # For details on connection pooling, see Rails configuration guide
-  # https://guides.rubyonrails.org/configuring.html#database-pooling
-  max_connections: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
+  # Web threads + in-Puma Solid Queue workers share the same pool — see
+  # docs/SPECIFICATIONS.md §10.3. Default of 5 starves both sides under load.
+  max_connections: <%= ENV.fetch("RAILS_MAX_THREADS", 5).to_i + 5 %>
 
 
 development:
@@ -89,7 +89,7 @@ production:
     <<: *default
     database: link_shortener_production
     username: link_shortener
-    password: <%= ENV["LINK_SHORTENER_TMP_DATABASE_PASSWORD"] %>
+    password: <%= ENV["LINK_SHORTENER_DATABASE_PASSWORD"] %>
   cache:
     <<: *primary_production
     database: link_shortener_production_cache
