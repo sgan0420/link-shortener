@@ -1,34 +1,94 @@
-<%# STUB — Task 24 replaces with the styled stats page. %>
-<h1>Stats for /<%= @short_link.slug %></h1>
+<% content_for :title, "Stats · /#{@short_link.slug} · Link Shortener" %>
+<% presenter = ShortLinkPresenter.new(@short_link,
+                                       host: request.host_with_port,
+                                       scheme: request.scheme) %>
 
-<section>
-  <h2>Summary</h2>
-  <p>Total clicks: <%= @stats.total_clicks %></p>
-</section>
+<section class="space-y-8">
+  <header class="flex items-baseline justify-between gap-4">
+    <div class="min-w-0">
+      <h1 class="truncate text-2xl font-mono font-semibold tracking-tight">
+        <%= presenter.short_url %>
+      </h1>
+      <p class="mt-1 truncate text-sm text-slate-500"
+         title="<%= @short_link.target_url %>">
+        <%= presenter.display_target %>
+      </p>
+    </div>
+    <%= link_to "← Shorten another", root_path,
+                class: "shrink-0 text-sm text-slate-500 hover:text-slate-900" %>
+  </header>
 
-<section>
-  <h2>By country</h2>
-  <% if @stats.by_country.empty? %>
-    <p>No clicks yet.</p>
-  <% else %>
-    <ul>
-      <% @stats.by_country.each do |bucket| %>
-        <li><%= bucket.country %>: <%= bucket.count %></li>
+  <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+    <div class="rounded-lg border border-slate-200 bg-white p-5">
+      <p class="text-xs uppercase tracking-wider text-slate-500">Total clicks</p>
+      <p class="mt-2 text-3xl font-semibold tabular-nums"><%= @stats.total_clicks %></p>
+    </div>
+    <div class="rounded-lg border border-slate-200 bg-white p-5">
+      <p class="text-xs uppercase tracking-wider text-slate-500">First click</p>
+      <p class="mt-2 text-sm tabular-nums">
+        <%= @stats.first_at ? l(@stats.first_at.utc, format: :short) : "—" %>
+      </p>
+    </div>
+    <div class="rounded-lg border border-slate-200 bg-white p-5">
+      <p class="text-xs uppercase tracking-wider text-slate-500">Last click</p>
+      <p class="mt-2 text-sm tabular-nums">
+        <%= @stats.last_at ? l(@stats.last_at.utc, format: :short) : "—" %>
+      </p>
+    </div>
+  </div>
+
+  <section>
+    <h2 class="text-sm font-semibold uppercase tracking-wider text-slate-500">By country</h2>
+    <div class="mt-3 overflow-hidden rounded-lg border border-slate-200 bg-white">
+      <% if @stats.by_country.empty? %>
+        <p class="p-5 text-sm text-slate-500">No clicks yet.</p>
+      <% else %>
+        <table class="min-w-full divide-y divide-slate-200">
+          <thead class="bg-slate-50 text-xs uppercase tracking-wider text-slate-500">
+            <tr>
+              <th class="px-5 py-3 text-left font-medium">Country</th>
+              <th class="px-5 py-3 text-right font-medium">Clicks</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-200 text-sm">
+            <% @stats.by_country.each do |bucket| %>
+              <tr>
+                <td class="px-5 py-3 font-mono"><%= bucket.country %></td>
+                <td class="px-5 py-3 text-right tabular-nums"><%= bucket.count %></td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
       <% end %>
-    </ul>
-  <% end %>
-</section>
+    </div>
+  </section>
 
-<section>
-  <h2>Recent visits</h2>
-  <% if @recents.empty? %>
-    <p>No visits yet.</p>
-  <% else %>
-    <ul>
-      <% @recents.each do |click| %>
-        <% cp = ClickPresenter.new(click) %>
-        <li><%= cp.occurred_at %> — <%= cp.location %> — <%= cp.ip_mask %></li>
+  <section>
+    <h2 class="text-sm font-semibold uppercase tracking-wider text-slate-500">Recent visits</h2>
+    <div class="mt-3 overflow-hidden rounded-lg border border-slate-200 bg-white">
+      <% if @recents.empty? %>
+        <p class="p-5 text-sm text-slate-500">No visits yet.</p>
+      <% else %>
+        <table class="min-w-full divide-y divide-slate-200">
+          <thead class="bg-slate-50 text-xs uppercase tracking-wider text-slate-500">
+            <tr>
+              <th class="px-5 py-3 text-left font-medium">When</th>
+              <th class="px-5 py-3 text-left font-medium">Location</th>
+              <th class="px-5 py-3 text-left font-medium">Visitor</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-200 text-sm">
+            <% @recents.each do |click| %>
+              <% cp = ClickPresenter.new(click) %>
+              <tr>
+                <td class="px-5 py-3 tabular-nums text-slate-700"><%= cp.occurred_at %></td>
+                <td class="px-5 py-3"><%= cp.location %></td>
+                <td class="px-5 py-3 font-mono text-slate-400"><%= cp.ip_mask %></td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
       <% end %>
-    </ul>
-  <% end %>
+    </div>
+  </section>
 </section>
