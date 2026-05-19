@@ -27,6 +27,9 @@ VCR.configure do |c|
   c.cassette_library_dir = 'spec/fixtures/vcr_cassettes'
   c.hook_into :webmock
   c.configure_rspec_metadata!
+  # Don't intercept localhost — Capybara spawns its own test server and
+  # Cuprite drives a headless browser against it.
+  c.ignore_localhost = true
 end
 
 Shoulda::Matchers.configure do |config|
