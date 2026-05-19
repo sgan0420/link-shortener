@@ -68,24 +68,41 @@ class TitleFetcher
     http.read_timeout = HTTP_READ_TIMEOUT
 
     request = Net::HTTP::Get.new(uri.request_uri, "User-Agent" => "LinkShortener/1.0")
-    response = http.request(request)
 
-    case response
-    when Net::HTTPRedirection
-      raise "too many redirects" if redirects_left <= 0
+    http.request(request) do |response|
+      case response
+      when Net::HTTPRedirection
+        raise "too many redirects" if redirects_left <= 0
 
-      new_uri = URI.parse(response["location"])
-      guard_against_private_address!(new_uri.host)
-      fetch_title(new_uri, redirects_left: redirects_left - 1)
-    when Net::HTTPSuccess
-      body = response.body.to_s.byteslice(0, MAX_BODY_BYTES)
-      doc  = Nokogiri::HTML(body)
-      raw  = doc.at_css("title")&.text.to_s.squish
-      raise "no title element" if raw.empty?
-
-      raw.first(MAX_TITLE_LENGTH)
-    else
-      raise "http #{response.code}"
+        new_uri = URI.parse(response["location"])
+        guard_against_private_address!(new_uri.host)
+        return fetch_title(new_uri, redirects_left: redirects_left - 1)
+      when Net::HTTPSuccess
+        return extract_title(read_capped_body(response))
+      else
+        raise "http #{response.code}"
+      end
     end
+  end
+
+  def read_capped_body(response)
+    body = +""
+    response.read_body do |chunk|
+      space = MAX_BODY_BYTES - body.bytesize
+      if chunk.bytesize >= space
+        body << chunk.byteslice(0, space)
+        break
+      end
+      body << chunk
+    end
+    body
+  end
+
+  def extract_title(body)
+    doc = Nokogiri::HTML(body)
+    raw = doc.at_css("title")&.text.to_s.squish
+    raise "no title element" if raw.empty?
+
+    raw.first(MAX_TITLE_LENGTH)
   end
 end

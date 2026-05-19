@@ -73,5 +73,20 @@ RSpec.describe TitleFetcher do
 
       expect(result.ok?).to be(false)
     end
+
+    it "aborts reading once body exceeds MAX_BODY_BYTES, ignoring content past the cap" do
+      # If we keep reading past the cap, the late <title> would be parsed.
+      # With streaming + early break, we stop before reaching it and report
+      # "no title element" as a soft failure.
+      stub_const("#{described_class.name}::MAX_BODY_BYTES", 32)
+      body = ("A" * 200) + "<title>Late</title>"
+      stub_request(:get, "https://example.com/big")
+        .to_return(status: 200, body: body, headers: { "Content-Type" => "text/html" })
+
+      result = described_class.call(url: "https://example.com/big")
+
+      expect(result.ok?).to be(false)
+      expect(result.reason).to match(/no title element/i)
+    end
   end
 end
