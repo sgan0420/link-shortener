@@ -1,0 +1,34 @@
+<%# STUB — Task 24 replaces with the styled stats page. %>
+<h1>Stats for /<%= @short_link.slug %></h1>
+
+<section>
+  <h2>Summary</h2>
+  <p>Total clicks: <%= @stats.total_clicks %></p>
+</section>
+
+<section>
+  <h2>By country</h2>
+  <% if @stats.by_country.empty? %>
+    <p>No clicks yet.</p>
+  <% else %>
+    <ul>
+      <% @stats.by_country.each do |bucket| %>
+        <li><%= bucket.country %>: <%= bucket.count %></li>
+      <% end %>
+    </ul>
+  <% end %>
+</section>
+
+<section>
+  <h2>Recent visits</h2>
+  <% if @recents.empty? %>
+    <p>No visits yet.</p>
+  <% else %>
+    <ul>
+      <% @recents.each do |click| %>
+        <% cp = ClickPresenter.new(click) %>
+        <li><%= cp.occurred_at %> — <%= cp.location %> — <%= cp.ip_mask %></li>
+      <% end %>
+    </ul>
+  <% end %>
+</section>

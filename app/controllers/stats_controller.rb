@@ -1,5 +1,9 @@
 # frozen_string_literal: true
 
 class StatsController < ApplicationController
-  # Actions added in Task 20.
+  def show
+    @short_link = ShortLink.find_by!(slug: params[:slug])
+    @stats      = ShortLinkStatsQuery.new(@short_link).call
+    @recents    = RecentClicksQuery.new(@short_link).call(limit: 50)
+  end
 end
