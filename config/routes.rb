@@ -7,7 +7,7 @@ Rails.application.routes.draw do
   get "up" => "rails/health#show", as: :rails_health_check
 
   root "short_links#new"
-  post "short_links" => "short_links#create"
+  post "short_links" => "short_links#create", as: :short_links
 
   # Slug constraint: 1-15 chars from nanoid's URL-safe alphabet.
   # /:slug/stats is declared BEFORE /:slug so Rails matches it first —

@@ -1,0 +1,9 @@
+<%# STUB — Task 22 replaces with the styled form. %>
+<%= form_with model: short_link, url: short_links_path, id: "shortener-form" do |f| %>
+  <% if short_link.errors.any? %>
+    <div role="alert"><%= short_link.errors.full_messages.to_sentence %></div>
+  <% end %>
+  <%= f.label :target_url, "Long URL" %>
+  <%= f.url_field :target_url, required: true %>
+  <%= f.submit "Shorten" %>
+<% end %>

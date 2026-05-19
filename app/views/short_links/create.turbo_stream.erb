@@ -1,0 +1,11 @@
+<%# STUB — Task 23 replaces with the styled result card. %>
+<%= turbo_stream.append "results" do %>
+  <article id="<%= dom_id(@short_link) %>">
+    <a href="/<%= @short_link.slug %>">/<%= @short_link.slug %></a>
+    <p><%= @short_link.target_url %></p>
+    <p id="<%= dom_id(@short_link, :title) %>">Fetching title…</p>
+  </article>
+<% end %>
+<%= turbo_stream.replace "shortener-form" do %>
+  <%= render "form", short_link: ShortLink.new %>
+<% end %>
