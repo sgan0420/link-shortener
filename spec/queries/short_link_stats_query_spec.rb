@@ -46,6 +46,17 @@ RSpec.describe ShortLinkStatsQuery do
     expect(bucket_countries).to include("ZZ", "US")
   end
 
+  it "folds nil-country and explicit 'ZZ' rows into a single 'ZZ' bucket" do
+    create_list(:click, 2, short_link: link, country: nil)
+    create_list(:click, 3, short_link: link, country: "ZZ")
+
+    result = described_class.new(link).call
+    zz_buckets = result.by_country.select { |b| b.country == "ZZ" }
+
+    expect(zz_buckets.size).to eq(1)
+    expect(zz_buckets.first.count).to eq(5)
+  end
+
   it "ignores clicks belonging to other short_links" do
     other_link = create(:short_link)
     create_list(:click, 5, short_link: other_link, country: "US")

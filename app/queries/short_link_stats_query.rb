@@ -21,8 +21,13 @@ class ShortLinkStatsQuery
   private
 
   def country_buckets(clicks)
-    clicks.group(:country).order(Arel.sql("count(*) DESC")).count.map do |country, count|
-      CountryBucket.new(country: country || "ZZ", count: count)
-    end
+    # COALESCE in the GROUP BY so nil-country and explicit "ZZ" rows fold
+    # into a single bucket rather than producing two buckets both labeled
+    # "ZZ" after a Ruby-side rename.
+    clicks
+      .group(Arel.sql("COALESCE(country, 'ZZ')"))
+      .order(Arel.sql("count(*) DESC"))
+      .count
+      .map { |country, count| CountryBucket.new(country: country, count: count) }
   end
 end
