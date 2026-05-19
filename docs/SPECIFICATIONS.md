@@ -32,6 +32,7 @@ Non-goals (deliberately out of scope):
 | Database | PostgreSQL |
 | Background jobs | Solid Queue (Puma plugin in prod — `SOLID_QUEUE_IN_PUMA=true`) |
 | Cache | Solid Cache (used for geolocation lookups) |
+| Action Cable adapter | Solid Cable (Postgres-backed; required for Turbo Stream broadcasts in prod) |
 | Frontend | ERB · Turbo · Stimulus · Tailwind (via `tailwindcss-rails` standalone binary) |
 | JS asset pipeline | `importmap-rails` (no Node, no bundler) |
 | Test | RSpec · FactoryBot · Capybara · Cuprite · WebMock · VCR · Shoulda Matchers · SimpleCov |
@@ -249,7 +250,7 @@ Later, async:
 |---|---|
 | **URL validation** | Allowlist scheme (`http`, `https`); length ≤2048; parse via `URI.parse`; reject `javascript:`, `data:`, `file:` and any non-allowlisted scheme |
 | **SSRF protection** | Before any HTTP fetch (title), resolve hostname and reject if any A/AAAA record is private/loopback/link-local/multicast/reserved |
-| **Rate limiting** | rack-attack: throttle `POST /short_links` to 20/min/IP; throttle redirect bursts; safelist localhost in dev/test |
+| **Rate limiting** | rack-attack: throttle `POST /short_links` to 20/min/IP (tight — form abuse is the realistic threat); `GET /:slug` throttled loosely at 1000/min/IP (a viral link is a *good* problem and shouldn't be capped at creator-rate); safelist localhost in dev/test. Wiki documents the trade-off |
 | **CSRF + headers** | Rails default CSRF on; add `Content-Security-Policy` (script-src self + Turbo's inline policy), `Referrer-Policy: no-referrer-when-downgrade`, `X-Content-Type-Options: nosniff`, `Strict-Transport-Security` in prod |
 | **PII minimization** | Store `SHA256(ip + ENV['CLICK_IP_SALT'])` instead of raw IP; country/city retained; per-environment salt; documented retention story |
 | **Public stats** | Intentional for the demo; documented in wiki as a production gap (would gate behind ownership/auth) |
@@ -303,13 +304,21 @@ Coverage target: organic ~90%+ line coverage as a by-product of layered testing,
 | `CLICK_IP_SALT` | per-env IP hash salt; never logged |
 | `IPAPI_BASE_URL` | default `https://ipapi.co`; overridable in tests |
 | `APP_HOST` | used by view helpers to construct short URLs |
+| `RAILS_MAX_THREADS` | Puma threads per process; also drives DB pool size |
+| `SOLID_QUEUE_IN_PUMA` | when `true`, runs the job worker in-process via the Puma plugin |
 
-### 10.3 Local dev
+### 10.3 Database connection pool sizing
+
+With `SOLID_QUEUE_IN_PUMA=true`, Puma worker threads and Solid Queue worker fibers share the same Active Record pool. The default `pool: 5` will starve — both web and jobs will block on connection checkout under any load.
+
+`config/database.yml` sets `pool: <%= ENV.fetch("RAILS_MAX_THREADS", 5).to_i + 5 %>` (defaulting effectively to 15) — Puma threads + Solid Queue's worker concurrency + headroom. `RAILS_MAX_THREADS` is documented above so reviewers can tune it. The wiki notes this as a single-process-tier consideration that goes away once the worker is split out.
+
+### 10.4 Local dev
 
 - `bin/setup` installs gems, prepares DB.
 - `bin/dev` runs `Procfile.dev`: web + Tailwind watcher + jobs (all Ruby; no Node).
 
-### 10.4 CI (GitHub Actions)
+### 10.5 CI (GitHub Actions)
 
 Single workflow on PR + push to main:
 1. Checkout
@@ -347,6 +356,8 @@ Status badge in README.
    - Public stats pages — intentional for demo, requires auth in production
    - Geolocation accuracy — VPN/proxy/NAT inaccuracy, carrier IPs, rate limits; workaround: swap `GeolocationService` to MaxMind GeoLite2
    - Click loss vs duplicate clicks — rare duplicates accepted over blocking redirects; eventual loss after 3 retry attempts is logged and acceptable
+   - Rate-limit asymmetry: form is throttled tight (abuse vector), redirect is throttled loose (viral traffic is a feature, not an attack); workaround if the redirect throttle ever matters: per-link throttle keyed on slug, not source IP
+   - In-process worker pool sharing: web + jobs share the AR pool; documented as a single-tier consideration that goes away when the worker process is extracted
 3. **Scalability considerations**
    - Current envelope: bounded by Postgres write throughput on `clicks`
    - Workarounds: append-only click sink + rollup; materialized view for stats; Solid Cache for slug → URL lookups; separate `bin/jobs` worker; read replicas for stats
