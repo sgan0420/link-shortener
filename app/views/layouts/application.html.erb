@@ -1,31 +1,43 @@
 <!DOCTYPE html>
-<html>
+<html lang="en" class="h-full bg-slate-50 text-slate-900">
   <head>
-    <title><%= content_for(:title) || "Link Shortener Tmp" %></title>
+    <title><%= content_for(:title) || "Link Shortener" %></title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="application-name" content="Link Shortener Tmp">
+    <meta name="application-name" content="Link Shortener">
     <meta name="mobile-web-app-capable" content="yes">
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
 
     <%= yield :head %>
 
-    <%# Enable PWA manifest for installable apps (make sure to enable in config/routes.rb too!) %>
-    <%#= tag.link rel: "manifest", href: pwa_manifest_path(format: :json) %>
-
     <link rel="icon" href="/icon.png" type="image/png">
     <link rel="icon" href="/icon.svg" type="image/svg+xml">
     <link rel="apple-touch-icon" href="/icon.png">
 
-    <%# Includes all stylesheet files in app/assets/stylesheets %>
     <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
   </head>
 
-  <body>
-    <main class="container mx-auto mt-28 px-5 flex">
-      <%= yield %>
+  <body class="h-full flex flex-col">
+    <header class="border-b bg-white">
+      <div class="mx-auto max-w-3xl px-6 py-4 flex items-center justify-between">
+        <%= link_to "Link Shortener", root_path, class: "text-lg font-semibold tracking-tight" %>
+        <span class="text-xs text-slate-500">CoinGecko take-home</span>
+      </div>
+    </header>
+
+    <main class="flex-1">
+      <div class="mx-auto max-w-3xl px-6 py-10">
+        <%= yield %>
+      </div>
     </main>
+
+    <footer class="border-t bg-white">
+      <div class="mx-auto max-w-3xl px-6 py-4 text-xs text-slate-500">
+        <a class="hover:underline" href="/up">Health</a> ·
+        <a class="hover:underline" href="https://github.com/sgan0420/link-shortener">Source</a>
+      </div>
+    </footer>
   </body>
 </html>
