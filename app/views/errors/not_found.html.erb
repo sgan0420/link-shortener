@@ -1,3 +1,11 @@
-<%# STUB — Task 21 replaces with the branded 404 page. %>
-<h1>404 — Not Found</h1>
-<p>We couldn't find that link.</p>
+<% content_for :title, "Not found · Link Shortener" %>
+
+<div class="text-center py-20">
+  <p class="text-sm uppercase tracking-wider text-slate-500">404</p>
+  <h1 class="mt-2 text-3xl font-semibold tracking-tight">We couldn't find that link.</h1>
+  <p class="mt-4 text-slate-600">It may have been mistyped, or never existed.</p>
+  <p class="mt-8">
+    <%= link_to "Shorten a new link", root_path,
+                class: "inline-flex items-center rounded-md bg-slate-900 px-4 py-2 text-white text-sm font-medium hover:bg-slate-700" %>
+  </p>
+</div>
