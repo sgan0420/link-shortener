@@ -1,0 +1,6 @@
+<%# Rendered both inline (during create) and via FetchTitleJob broadcast.
+    No `request` available from the broadcast context, so the presenter is
+    constructed without host/scheme — title_label doesn't need them. %>
+<span id="<%= dom_id(short_link, :title) %>" class="text-sm text-slate-600">
+  <%= ShortLinkPresenter.new(short_link).title_label %>
+</span>

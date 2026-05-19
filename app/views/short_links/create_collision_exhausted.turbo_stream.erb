@@ -1,4 +1,6 @@
-<%# STUB — Task 23 replaces with the styled alert. %>
 <%= turbo_stream.prepend "results" do %>
-  <div role="alert">Couldn't generate a unique short URL right now. Please retry.</div>
+  <div role="alert"
+       class="rounded-md border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+    Couldn't generate a unique short URL right now. Please retry.
+  </div>
 <% end %>
