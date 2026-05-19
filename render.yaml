@@ -1,0 +1,54 @@
+# Render Blueprint — one web service + one managed Postgres instance.
+# Deployment is git-push driven from `main`; the build script runs
+# migrations idempotently so each deploy lands schema changes too.
+#
+# Solid Queue runs in-Puma (SOLID_QUEUE_IN_PUMA=true) so we don't pay
+# for a second worker service. See docs/SPECIFICATIONS.md §10.3 for
+# the DB pool sizing rationale that makes this viable.
+
+services:
+  - type: web
+    name: link-shortener
+    runtime: ruby
+    plan: free
+    region: oregon
+    buildCommand: ./bin/render-build.sh
+    startCommand: bundle exec bin/rails server
+    healthCheckPath: /up
+    autoDeploy: true
+    envVars:
+      - key: RAILS_ENV
+        value: production
+      - key: RAILS_LOG_TO_STDOUT
+        value: "true"
+      - key: RAILS_SERVE_STATIC_FILES
+        value: "true"
+      - key: SOLID_QUEUE_IN_PUMA
+        value: "true"
+      - key: RAILS_MAX_THREADS
+        value: "5"
+
+      # Secrets and host config — set in the Render dashboard after the
+      # service is provisioned, or in the Blueprint apply UI.
+      - key: RAILS_MASTER_KEY
+        sync: false
+      - key: APP_HOST
+        sync: false
+
+      # Auto-generated strong random values on first apply.
+      - key: SECRET_KEY_BASE
+        generateValue: true
+      - key: CLICK_IP_SALT
+        generateValue: true
+
+      - key: DATABASE_URL
+        fromDatabase:
+          name: link-shortener-db
+          property: connectionString
+
+databases:
+  - name: link-shortener-db
+    plan: free
+    databaseName: link_shortener_production
+    user: link_shortener
+    region: oregon
