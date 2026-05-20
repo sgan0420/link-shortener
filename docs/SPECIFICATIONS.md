@@ -209,9 +209,10 @@ Later, async:
 | `RecordClickJob` | Retry on transient errors, ≤3 attempts | Retries reuse the original `occurred_at`; worst-case duplicate row, which is acceptable | After max attempts → drop the click + log it. Documented trade-off: rare loss preferred over blocking redirect |
 
 **Non-retryable errors** (`discard_on`):
-- `URI::InvalidURIError`, `Addressable::URI::InvalidURIError`
-- `TitleFetcher::PrivateAddressError` (SSRF guard)
-- `Resolv::ResolvError` (DNS) — after first attempt, mark failed
+- `TitleFetcher::PrivateAddressError` (SSRF guard) — mark failed + broadcast, no retry
+- `ActiveJob::DeserializationError` (record gone between enqueue + perform) — silent discard
+
+Other failure modes (`URI::InvalidURIError`, DNS lookup failure, body-cap exhaustion, missing `<title>` element, non-2xx response) are absorbed *inside* `TitleFetcher#call` as `Result.new(ok: false, reason: …)` and never surface to the job. The job branches on `result.ok?` and writes `title_status: :failed` for the failure path. This keeps the job's rescue chain small and makes the service's error surface the single source of truth for "what counts as a soft failure".
 
 ### 7.3 Timeout matrix (defense in depth)
 

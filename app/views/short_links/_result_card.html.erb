@@ -7,8 +7,13 @@
          data-controller="history-recorder"
          data-history-recorder-slug-value="<%= short_link.slug %>">
   <%# Subscribe this card to Turbo Stream broadcasts for the link, so
-      FetchTitleJob's broadcast_replace_to updates the title slot live. %>
-  <%= turbo_stream_from short_link %>
+      FetchTitleJob's broadcast_replace_to updates the title slot live.
+      Only pending cards need this — fetched/failed are terminal states,
+      no broadcast will ever fire, so on /my-links we avoid 50 idle
+      Action Cable subscriptions per page load. %>
+  <% if short_link.pending? %>
+    <%= turbo_stream_from short_link %>
+  <% end %>
 
   <div class="flex items-baseline justify-between gap-4">
     <a href="<%= presenter.short_url %>"

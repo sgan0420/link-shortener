@@ -62,6 +62,7 @@ Every variable that matters in production:
 | `SOLID_QUEUE_IN_PUMA`  | production  | `"true"` runs the Solid Queue worker in the web process                               |
 | `IPAPI_BASE_URL`       | all         | Defaults to `https://ipapi.co`. Overridable for staging fixtures.                     |
 | `APP_HOST`             | production  | Used by `ShortLinkPresenter` to build absolute short URLs                             |
+| `APP_SCHEME`           | optional    | Defaults to `https`. Override only if deploying behind a plain HTTP proxy             |
 
 ## Testing
 
