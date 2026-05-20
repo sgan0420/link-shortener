@@ -125,7 +125,7 @@ Concurrent shorten-throughput is bounded by Postgres write throughput on `short_
 | Form abuse / mass-shortening                        | rack-attack: 20 req/min/IP on `POST /short_links`                                                                                |
 | Redirect path abuse                                 | rack-attack: 1000 req/min/IP on `GET /:slug` (loose by design — see §2.6)                                                        |
 | CSRF on the form                                    | Rails default CSRF token                                                                                                          |
-| XSS via stored `target_url`                         | Rails ERB auto-escapes everything; target URLs are rendered as text via `ShortLinkPresenter#display_target`, never as raw HTML  |
+| XSS via stored `target_url`                         | Rails ERB auto-escapes everything; target URLs are rendered as text in the result card and stats header (CSS `line-clamp-2 break-all` handles long URLs), never as raw HTML  |
 | Clickjacking                                        | `X-Frame-Options: DENY` + CSP `frame-ancestors 'none'`                                                                            |
 | MIME sniffing                                       | `X-Content-Type-Options: nosniff`                                                                                                 |
 | Mixed-content / downgrade attacks                   | `force_ssl = true` + HSTS (`max-age=1.year; includeSubDomains`)                                                                   |

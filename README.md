@@ -2,17 +2,20 @@
 
 A small URL-shortener service built for the CoinGecko engineering assessment. Submit a long URL, get a short, unguessable one back — with public, per-link stats showing clicks, country breakdown, and recent visits. Async page-title fetching via Turbo Streams so the result card updates live the moment the title is resolved.
 
-> **Live demo:** _(populated after deploy in Task 30)_
+> **🔗 Live demo:** [link-shortener-x7ry.onrender.com](https://link-shortener-x7ry.onrender.com/)
 > **Design wiki:** [`docs/WIKI.md`](docs/WIKI.md)
-> **Source of truth specs:** [`docs/REQUIREMENTS.md`](docs/REQUIREMENTS.md) · [`docs/SPECIFICATIONS.md`](docs/SPECIFICATIONS.md) · [`docs/PLAN.md`](docs/PLAN.md) · [`docs/BACKLOG.md`](docs/BACKLOG.md)
+> **Source-of-truth specs:** [`docs/REQUIREMENTS.md`](docs/REQUIREMENTS.md) · [`docs/SPECIFICATIONS.md`](docs/SPECIFICATIONS.md) · [`docs/PLAN.md`](docs/PLAN.md) · [`docs/BACKLOG.md`](docs/BACKLOG.md)
+
+> First request after idle may cold-start in ~30 s — Render's free web tier spins down after 15 min of inactivity.
 
 ## Features
 
 - Short, unguessable 7-character URLs (nanoid)
-- Asynchronous `<title>` fetching with live Turbo Stream UI update
-- Public per-link stats: total clicks, first/last seen, country breakdown, recent visits
+- Async `<title>` fetching with live Turbo Stream UI update — the result card swaps from "Fetching title…" to the real title without a page reload
+- Public per-link stats page (`/<slug>/stats`): total clicks, first/last seen, country breakdown, recent visits
+- Per-browser "My links" page (`/my-links`): server-side hydration of slugs stored in `localStorage`. No accounts; localStorage is the ownership proxy — see [`docs/WIKI.md`](docs/WIKI.md) §2.3
 - Background click logging with IP-based geolocation; raw IPs are salted-hashed at rest
-- SSRF-protected title fetching, rate-limited form, CSP + HSTS + secure headers
+- SSRF-protected title fetching, rate-limited form (`POST /short_links` 20 req/min/IP), loose redirect throttle, CSP + HSTS + nosniff + frame-ancestors + secure headers
 
 ## Tech stack
 
