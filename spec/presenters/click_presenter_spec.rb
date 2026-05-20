@@ -42,8 +42,8 @@ RSpec.describe ClickPresenter do
   end
 
   describe "#occurred_at" do
-    it "formats as 'YYYY-MM-DD HH:MM UTC'" do
-      expect(presenter.occurred_at).to eq("2026-05-17 14:30 UTC")
+    it "formats as 'YYYY-MM-DD HH:MM:SS UTC'" do
+      expect(presenter.occurred_at).to eq("2026-05-17 14:30:00 UTC")
     end
   end
 end

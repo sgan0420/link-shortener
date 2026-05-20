@@ -31,7 +31,7 @@ RSpec.describe ShortLink, type: :model do
 
   describe ".reserved_slug?" do
     it "is true for known reserved slugs" do
-      %w[up stats about admin rails assets short_links].each do |slug|
+      %w[up stats about admin rails assets short_links history].each do |slug|
         expect(ShortLink.reserved_slug?(slug)).to be(true)
       end
     end

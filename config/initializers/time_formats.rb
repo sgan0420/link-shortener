@@ -4,4 +4,4 @@
 # stats view leans on this for first/last click summaries; the format
 # stays stable across timezones because callers force .utc before
 # rendering.
-Time::DATE_FORMATS[:short] = "%Y-%m-%d %H:%M %Z"
+Time::DATE_FORMATS[:short] = "%Y-%m-%d %H:%M:%S %Z"

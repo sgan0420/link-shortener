@@ -26,6 +26,6 @@ class ClickPresenter
   end
 
   def occurred_at
-    @click.occurred_at.utc.strftime("%Y-%m-%d %H:%M UTC")
+    @click.occurred_at.utc.strftime("%Y-%m-%d %H:%M:%S UTC")
   end
 end

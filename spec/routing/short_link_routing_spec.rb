@@ -30,4 +30,8 @@ RSpec.describe "ShortLink routing", type: :routing do
   it "still routes /up to the Rails health check (reserved slug)" do
     expect(get: "/up").to route_to(controller: "rails/health", action: "show")
   end
+
+  it "routes GET /history to history#show (reserved slug)" do
+    expect(get: "/history").to route_to(controller: "history", action: "show")
+  end
 end

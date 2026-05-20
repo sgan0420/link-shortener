@@ -23,7 +23,8 @@
     <header class="border-b bg-white">
       <div class="mx-auto max-w-3xl px-6 py-4 flex items-center justify-between">
         <%= link_to "Link Shortener", root_path, class: "text-lg font-semibold tracking-tight" %>
-        <span class="text-xs text-slate-500">CoinGecko take-home</span>
+        <%= link_to "My links", history_path,
+                    class: "text-sm text-slate-500 hover:text-slate-900" %>
       </div>
     </header>
 
@@ -35,7 +36,6 @@
 
     <footer class="border-t bg-white">
       <div class="mx-auto max-w-3xl px-6 py-4 text-xs text-slate-500">
-        <a class="hover:underline" href="/up">Health</a> ·
         <a class="hover:underline" href="https://github.com/sgan0420/link-shortener">Source</a>
       </div>
     </footer>

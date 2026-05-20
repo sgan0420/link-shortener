@@ -1,0 +1,28 @@
+<% content_for :title, "My links · Link Shortener" %>
+
+<section data-controller="history-list">
+  <header class="flex items-baseline justify-between gap-4">
+    <div>
+      <h1 class="text-2xl font-semibold tracking-tight">My links</h1>
+      <p class="mt-1 text-sm text-slate-500">
+        Recently shortened URLs from this browser. Stored locally — no account needed.
+      </p>
+    </div>
+    <%= link_to "← Shorten another", root_path,
+                class: "shrink-0 text-sm text-slate-500 hover:text-slate-900" %>
+  </header>
+
+  <%# Rendered into by the history-list controller from localStorage. %>
+  <div data-history-list-target="entries" class="mt-8 space-y-4"></div>
+
+  <%# Shown when localStorage has no entries (initial state). The controller
+      removes it as soon as it inserts at least one entry. %>
+  <div data-history-list-target="empty"
+       class="mt-8 rounded-lg border border-dashed border-slate-300 bg-white p-10 text-center">
+    <p class="text-sm text-slate-500">No links yet.</p>
+    <p class="mt-2 text-sm">
+      <%= link_to "Shorten your first one", root_path,
+                  class: "underline text-slate-700 hover:text-slate-900" %>
+    </p>
+  </div>
+</section>
