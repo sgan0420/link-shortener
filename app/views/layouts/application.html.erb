@@ -22,7 +22,9 @@
   <body class="h-full flex flex-col">
     <header class="border-b bg-white">
       <div class="mx-auto max-w-3xl px-6 py-4 flex items-center justify-between">
-        <%= link_to "Link Shortener", root_path, class: "text-lg font-semibold tracking-tight" %>
+        <%= link_to root_path, class: "text-lg font-semibold tracking-tight" do %>
+          <span aria-hidden="true">🔗</span> Link Shortener
+        <% end %>
         <%= link_to "My links", my_links_path,
                     class: "text-sm text-slate-500 hover:text-slate-900" %>
       </div>
