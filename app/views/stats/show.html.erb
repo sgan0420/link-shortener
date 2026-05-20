@@ -9,9 +9,9 @@
       <h1 class="truncate text-2xl font-mono font-semibold tracking-tight">
         <%= presenter.short_url %>
       </h1>
-      <p class="mt-1 truncate text-sm text-slate-500"
+      <p class="mt-1 line-clamp-2 text-sm break-all text-slate-500"
          title="<%= @short_link.target_url %>">
-        <%= presenter.display_target %>
+        <%= @short_link.target_url %>
       </p>
       <p class="mt-1 truncate text-sm text-slate-600">
         <%= presenter.title_label %>

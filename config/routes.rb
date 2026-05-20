@@ -9,6 +9,14 @@ Rails.application.routes.draw do
   root "short_links#new"
   post "short_links" => "short_links#create", as: :short_links
 
+  # Server-side hydration of the /my-links page. Stimulus reads the slug
+  # list from localStorage and POSTs it here; the controller looks up
+  # the records and returns an HTML fragment of saved-card partials.
+  # Decoupling storage (just slugs, on the client) from data (full
+  # link details, on the server) keeps localStorage small and lets the
+  # server always be the source of truth for title/target_url.
+  post "short_links/lookup" => "short_links#lookup", as: :lookup_short_links
+
   # Client-local "My links" page (reads localStorage via a Stimulus
   # controller). No server-side index — there's no auth, so a global
   # recent-links list would leak across users. The path is reserved at

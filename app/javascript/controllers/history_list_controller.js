@@ -1,70 +1,56 @@
 import { Controller } from "@hotwired/stimulus"
 
-// Reads localStorage on connect and renders one card per saved entry.
-// Mirrors the styling of the server-rendered _result_card so the page
-// feels of-a-piece with the form's result list.
+// Reads the slug list from localStorage on connect, POSTs it to the
+// server (which returns rendered card partials), and injects the
+// response HTML into the entries target. Server is the source of
+// truth for title, target URL, and saved-at timestamp; localStorage
+// only knows "which slugs has this browser shortened".
 export default class extends Controller {
   static targets = [ "entries", "empty" ]
-  static STORAGE_KEY = "link-shortener.history"
+  static values  = { endpoint: String }
 
-  connect() {
-    const entries = this.#read()
-    if (entries.length === 0) return
+  static STORAGE_KEY = "link-shortener.slugs"
+
+  async connect() {
+    const slugs = this.#read()
+    if (slugs.length === 0) return  // empty state stays visible
+
+    let html
+    try {
+      const response = await fetch(this.endpointValue, {
+        method: "POST",
+        credentials: "same-origin",
+        headers: {
+          "Content-Type": "application/json",
+          "Accept":       "text/html",
+          "X-CSRF-Token": this.#csrfToken(),
+        },
+        body: JSON.stringify({ slugs }),
+      })
+      if (!response.ok) throw new Error(`Lookup failed: ${response.status}`)
+      html = (await response.text()).trim()
+    } catch (err) {
+      console.warn("[my-links] lookup failed:", err)
+      return  // empty state stays visible
+    }
+
+    if (!html) return  // server returned no matching links
 
     this.emptyTarget.remove()
-    this.entriesTarget.innerHTML = entries.map(e => this.#renderEntry(e)).join("")
+    this.entriesTarget.innerHTML = html
   }
 
   #read() {
     try {
       const raw = localStorage.getItem(this.constructor.STORAGE_KEY)
-      return raw ? JSON.parse(raw) : []
+      const parsed = raw ? JSON.parse(raw) : []
+      return Array.isArray(parsed) ? parsed.filter(s => typeof s === "string") : []
     } catch {
       return []
     }
   }
 
-  #renderEntry(entry) {
-    const shortUrl  = this.#escape(entry.short_url)
-    const target    = this.#escape(entry.target)
-    const savedAt   = this.#escape(this.#formatDate(entry.saved_at))
-    const statsPath = `/${this.#escape(entry.slug)}/stats`
-
-    return `
-      <article class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
-        <div class="flex items-baseline justify-between gap-4">
-          <a href="${shortUrl}" target="_blank" rel="noopener noreferrer"
-             class="truncate text-lg font-mono text-slate-900 underline decoration-slate-300 hover:decoration-slate-900">
-            ${shortUrl}
-          </a>
-          <a href="${statsPath}"
-             class="shrink-0 text-sm text-slate-500 hover:text-slate-900">View stats</a>
-        </div>
-        <p class="mt-1 truncate text-sm text-slate-500" title="${target}">${target}</p>
-        <p class="mt-3 text-xs text-slate-400">Saved ${savedAt}</p>
-      </article>
-    `
-  }
-
-  #formatDate(iso) {
-    const d = new Date(iso)
-    if (Number.isNaN(d.getTime())) return ""
-    // YYYY-MM-DD HH:MM — local time so it reads naturally to the visitor.
-    const pad = n => String(n).padStart(2, "0")
-    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ` +
-           `${pad(d.getHours())}:${pad(d.getMinutes())}`
-  }
-
-  // Minimal HTML-attribute escape. The values we render came from server-
-  // controlled fields (slug, short_url) or user input (target_url) that
-  // the model already validates as http/https, but localStorage can be
-  // tampered with from the console — so escape defensively.
-  #escape(value) {
-    return String(value || "")
-      .replaceAll("&", "&amp;")
-      .replaceAll("<", "&lt;")
-      .replaceAll(">", "&gt;")
-      .replaceAll('"', "&quot;")
-      .replaceAll("'", "&#39;")
+  #csrfToken() {
+    return document.querySelector('meta[name="csrf-token"]')?.content || ""
   }
 }

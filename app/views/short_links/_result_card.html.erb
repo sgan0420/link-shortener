@@ -5,9 +5,7 @@
 <article id="<%= dom_id(short_link) %>"
          class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm animate-fade-in"
          data-controller="history-recorder"
-         data-history-recorder-slug-value="<%= short_link.slug %>"
-         data-history-recorder-target-value="<%= short_link.target_url %>"
-         data-history-recorder-short-url-value="<%= presenter.short_url %>">
+         data-history-recorder-slug-value="<%= short_link.slug %>">
   <%# Subscribe this card to Turbo Stream broadcasts for the link, so
       FetchTitleJob's broadcast_replace_to updates the title slot live. %>
   <%= turbo_stream_from short_link %>
@@ -24,11 +22,18 @@
                 class: "shrink-0 text-sm text-slate-500 hover:text-slate-900" %>
   </div>
 
-  <p class="mt-1 truncate text-sm text-slate-500" title="<%= short_link.target_url %>">
-    <%= presenter.display_target %>
+  <p class="mt-1 line-clamp-2 text-sm break-all text-slate-500"
+     title="<%= short_link.target_url %>">
+    <%= short_link.target_url %>
   </p>
 
   <p class="mt-3">
     <%= render "title", short_link: short_link %>
   </p>
+
+  <% if local_assigns[:show_saved_at] %>
+    <p class="mt-3 text-xs text-slate-400">
+      Saved <%= l(short_link.created_at.utc, format: :short) %>
+    </p>
+  <% end %>
 </article>

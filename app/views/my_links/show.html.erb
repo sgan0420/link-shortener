@@ -1,6 +1,7 @@
 <% content_for :title, "My links · Link Shortener" %>
 
-<section data-controller="history-list">
+<section data-controller="history-list"
+         data-history-list-endpoint-value="<%= lookup_short_links_path %>">
   <header class="flex items-baseline justify-between gap-4">
     <div>
       <h1 class="text-2xl font-semibold tracking-tight">My links</h1>

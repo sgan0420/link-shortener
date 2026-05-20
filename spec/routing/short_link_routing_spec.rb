@@ -11,6 +11,10 @@ RSpec.describe "ShortLink routing", type: :routing do
     expect(post: "/short_links").to route_to(controller: "short_links", action: "create")
   end
 
+  it "routes POST /short_links/lookup to short_links#lookup" do
+    expect(post: "/short_links/lookup").to route_to(controller: "short_links", action: "lookup")
+  end
+
   it "routes GET /:slug/stats to stats#show before /:slug catches it" do
     expect(get: "/abc1234/stats").to route_to(
       controller: "stats", action: "show", slug: "abc1234"

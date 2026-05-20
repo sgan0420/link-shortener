@@ -17,18 +17,6 @@ RSpec.describe ShortLinkPresenter do
     end
   end
 
-  describe "#display_target" do
-    it "returns the full target_url when it's short enough" do
-      expect(presenter.display_target).to eq("https://example.com/path")
-    end
-
-    it "truncates very long target URLs with an ellipsis" do
-      link.target_url = "https://example.com/" + ("x" * 200)
-      expect(presenter.display_target.length).to be <= 80
-      expect(presenter.display_target).to end_with("…")
-    end
-  end
-
   describe "#title_label" do
     it "shows the title when fetched" do
       link.title = "Hello"
