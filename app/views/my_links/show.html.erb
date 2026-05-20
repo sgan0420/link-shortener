@@ -1,4 +1,10 @@
 <% content_for :title, "My links · Link Shortener" %>
+<%# Skip Turbo's cached preview on navigation. Without this, returning
+    to /my-links flashes the previous-render cards before the fresh
+    empty shell loads and Stimulus re-hydrates from localStorage. %>
+<% content_for :head do %>
+  <%= tag.meta name: "turbo-cache-control", content: "no-preview" %>
+<% end %>
 
 <section data-controller="history-list"
          data-history-list-endpoint-value="<%= lookup_short_links_path %>">
