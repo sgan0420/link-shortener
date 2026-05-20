@@ -43,9 +43,26 @@ For a keyspace of size N = 64⁷, the probability of any collision among k slugs
 
 `up`, `stats`, `about`, `admin`, `rails`, `assets`, `short_links`, `my-links` are blocked at creation time by `ShortLink::RESERVED_SLUGS`. The DB unique index can't protect against future top-level routes shadowing user-generated slugs — this list is the application-level invariant. New top-level routes must add themselves here.
 
-### 2.3 Public stats pages
+### 2.3 No user accounts — localStorage as an ownership proxy
 
-Intentional for this demo: anyone with a short URL can append `/stats` and see traffic. A production deployment would gate this behind ownership/auth (magic-link sign-in, OAuth, etc. — see [`docs/BACKLOG.md`](./BACKLOG.md)).
+User auth is deliberately out of scope. That decision flows into two visible places:
+
+**Public stats pages.** Anyone with a short URL can append `/stats` and see its traffic. A production deployment would gate this behind ownership/auth (magic-link sign-in, OAuth, etc. — see [`docs/BACKLOG.md`](./BACKLOG.md)).
+
+**`/my-links` per-browser scoping.** Each browser stores its own slug list in localStorage under `link-shortener.slugs`. When `/my-links` loads, a Stimulus controller POSTs that list to `POST /short_links/lookup`, which queries `ShortLink.where(slug: …)` and returns rendered cards. The server is the source of truth for title / target URL / saved-at; localStorage only answers "which slugs has *this* browser shortened?". This is the closest we can get to per-user link scoping without shipping an auth system.
+
+The trade-offs of the localStorage proxy:
+
+- **Not portable across browsers or devices.** A link shortened in Chrome won't appear on Firefox's `/my-links`.
+- **Lost on clear-site-data.** No "forgot account" recovery; the data is the cookie jar.
+- **Trivially spoofable.** A motivated visitor can edit localStorage to claim any slug — but the worst they can do is *show themselves* someone else's link in their own `/my-links`, which they already could by visiting `/<slug>/stats` directly (see "Public stats pages" above). Ownership is the same shape either way: by knowing the slug.
+
+**Migration path to real auth:**
+
+1. Add a `users` table + magic-link sign-in (or OAuth).
+2. Add `user_id` (nullable for the demo data) FK on `short_links`. `ShortLinksController#create` sets `short_link.user = current_user`.
+3. Replace `POST /short_links/lookup` with `current_user.short_links.order(created_at: :desc)` — the endpoint disappears, the Stimulus controllers shrink to nothing, and `/my-links` becomes a normal server-rendered index. The `_result_card` partial keeps its existing `show_saved_at:` flag and runs unchanged.
+4. Gate `/:slug/stats` on ownership.
 
 ### 2.4 Geolocation accuracy
 

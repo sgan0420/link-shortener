@@ -11,6 +11,13 @@ class ShortLinksController < ApplicationController
   # from localStorage, controller returns rendered cards. Order of the
   # response mirrors the order of the request, so the client's "newest
   # first" ordering is preserved.
+  #
+  # Why the client passes the slug list instead of the server scoping
+  # to a user: there's no auth in scope. localStorage stands in for
+  # per-user ownership — each browser tracks its own slugs and asks
+  # the server to hydrate them. Post-auth this becomes
+  # `current_user.short_links.order(created_at: :desc)` and the
+  # endpoint signature disappears entirely. See docs/WIKI.md §2.3.
   def lookup
     slugs = Array(params[:slugs]).map(&:to_s).first(LOOKUP_MAX_SLUGS)
     by_slug = ShortLink.where(slug: slugs).index_by(&:slug)

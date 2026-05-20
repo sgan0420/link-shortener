@@ -1,5 +1,19 @@
 import { Controller } from "@hotwired/stimulus"
 
+// Why localStorage and not a user account:
+// No user auth is in scope for this assessment. localStorage acts as
+// a per-browser "ownership bookmark" — each browser remembers the
+// slugs it shortened, and /my-links hydrates those into cards on the
+// fly. This means a shortener on browser A can't see browser B's
+// links, which is the closest we can get to per-user scoping without
+// shipping an auth system.
+//
+// Post-auth this would migrate to a `User has_many :short_links`
+// association: ShortLinksController#create would set
+// short_link.user = current_user, /my-links would scope server-side
+// instead of taking slugs from the client, and the lookup endpoint
+// could disappear entirely.
+//
 // Reads the slug list from localStorage on connect, POSTs it to the
 // server (which returns rendered card partials), and injects the
 // response HTML into the entries target. Server is the source of

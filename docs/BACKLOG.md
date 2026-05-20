@@ -16,6 +16,7 @@ Deliberately deferred to keep the MVP tight. Nothing here blocks the assessment 
 ## Auth + ownership
 
 - **Owner-only stats** with magic-link sign-in. Closes the §2.3 "stats are public" deliberately-deferred limit, while keeping the no-account simplicity for visitors. Adds a `user_id` (nullable) FK on `short_links` and gates `StatsController#show`.
+- **Migrate `/my-links` from localStorage to a `User has_many :short_links` association** once auth lands. The current Stimulus-driven hydration is an ownership proxy for this demo; with real auth the `POST /short_links/lookup` endpoint disappears and `MyLinksController#show` queries `current_user.short_links` server-side. See `docs/WIKI.md` §2.3 for the full migration path.
 
 ## UI
 
