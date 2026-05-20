@@ -41,7 +41,7 @@ For a keyspace of size N = 64⁷, the probability of any collision among k slugs
 
 ### 2.2 Reserved slugs
 
-`up`, `stats`, `about`, `admin`, `rails`, `assets`, `short_links` are blocked at creation time by `ShortLink::RESERVED_SLUGS`. The DB unique index can't protect against future top-level routes shadowing user-generated slugs — this list is the application-level invariant. New top-level routes must add themselves here.
+`up`, `stats`, `about`, `admin`, `rails`, `assets`, `short_links`, `my-links` are blocked at creation time by `ShortLink::RESERVED_SLUGS`. The DB unique index can't protect against future top-level routes shadowing user-generated slugs — this list is the application-level invariant. New top-level routes must add themselves here.
 
 ### 2.3 Public stats pages
 

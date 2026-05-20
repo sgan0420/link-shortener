@@ -1,4 +1,6 @@
-<%= turbo_stream.append "results" do %>
+<%# `update` (not `append`) — the form is meant to feel transactional:
+    one card visible at a time, full history is at /my-links. %>
+<%= turbo_stream.update "results" do %>
   <%= render "result_card", short_link: @short_link %>
 <% end %>
 

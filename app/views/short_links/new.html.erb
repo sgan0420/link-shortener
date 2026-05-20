@@ -9,4 +9,10 @@
   </div>
 
   <div id="results" class="mt-8 space-y-4"></div>
+
+  <p class="mt-4 text-xs text-slate-500">
+    Only the most recent link is shown here.
+    <%= link_to "View all your links →", my_links_path,
+                class: "text-slate-700 underline hover:text-slate-900" %>
+  </p>
 </section>

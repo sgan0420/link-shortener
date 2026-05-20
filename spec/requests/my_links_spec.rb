@@ -2,10 +2,10 @@
 
 require "rails_helper"
 
-RSpec.describe "History", type: :request do
-  describe "GET /history" do
+RSpec.describe "MyLinks", type: :request do
+  describe "GET /my-links" do
     it "renders the page with the stimulus controller anchor" do
-      get "/history"
+      get "/my-links"
 
       expect(response).to have_http_status(:ok)
       expect(response.body).to include("My links")

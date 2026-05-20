@@ -29,3 +29,14 @@
 
 en:
   hello: "Hello world"
+
+  # Override Rails' default :short time format so `l(time, format: :short)`
+  # in views matches the explicit strftime in ClickPresenter — seconds
+  # and timezone label included. Callers pass `.utc` time so the %Z
+  # always reads "UTC".
+  time:
+    formats:
+      short: "%Y-%m-%d %H:%M:%S %Z"
+  date:
+    formats:
+      short: "%Y-%m-%d"

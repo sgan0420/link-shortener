@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class ShortLink < ApplicationRecord
-  RESERVED_SLUGS = %w[up stats about admin rails assets short_links history].freeze
+  RESERVED_SLUGS = %w[up stats about admin rails assets short_links my-links].freeze
   TARGET_URL_SCHEME = /\Ahttps?\z/
 
   enum :title_status, { pending: 0, fetched: 1, failed: 2 }
