@@ -10,7 +10,7 @@ bundle install
 echo "==> Precompiling assets (includes tailwindcss:build via tailwindcss-rails)"
 bundle exec rails assets:precompile
 
-echo "==> Running migrations"
-bundle exec rails db:migrate
+echo "==> Preparing databases (loads Solid schemas on first deploy, migrates on subsequent)"
+bundle exec rails db:prepare
 
 echo "==> Build complete"

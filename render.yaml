@@ -41,7 +41,22 @@ services:
       - key: CLICK_IP_SALT
         generateValue: true
 
+      # All four Solid logical DBs collapse to the same physical Postgres
+      # on the free tier — table namespaces (solid_queue_*, solid_cache_*,
+      # solid_cable_*) keep them disjoint. See docs/WIKI.md §2.8.
       - key: DATABASE_URL
+        fromDatabase:
+          name: link-shortener-db
+          property: connectionString
+      - key: CACHE_DATABASE_URL
+        fromDatabase:
+          name: link-shortener-db
+          property: connectionString
+      - key: QUEUE_DATABASE_URL
+        fromDatabase:
+          name: link-shortener-db
+          property: connectionString
+      - key: CABLE_DATABASE_URL
         fromDatabase:
           name: link-shortener-db
           property: connectionString

@@ -91,6 +91,12 @@ The geolocation provider is **ipapi.co** — free, no signup, HTTPS on the free 
 
 With `SOLID_QUEUE_IN_PUMA=true`, Puma worker threads and Solid Queue's polling fibers share the same Active Record pool. We compensate via `pool: RAILS_MAX_THREADS + 5` (effective default 15). If web latency starts competing with job throughput, the next step is extracting `bin/jobs` as a separate Render service.
 
+### 2.8 Collapsed Solid trifecta on the free tier
+
+Rails 8.1 ships Solid Queue / Cache / Cable as separate logical databases — the generator's `production` block in `database.yml` configures four independent connections. The Render free tier gives us exactly one physical Postgres, so the four logical DBs all resolve to the same `DATABASE_URL` (via `CACHE_DATABASE_URL` / `QUEUE_DATABASE_URL` / `CABLE_DATABASE_URL` env vars wired through `render.yaml`). The table namespaces (`solid_queue_*`, `solid_cache_entries`, `solid_cable_messages`) keep them disjoint inside the shared physical DB.
+
+A budgeted production deployment would point each env var at its own physical Postgres instance — separate machines for queue / cache / cable isolates noisy-neighbor effects (e.g. a click-write spike doesn't slow down job pickup latency). The application code doesn't change; only the env wiring.
+
 ---
 
 ## 3. Scalability considerations
