@@ -3,7 +3,7 @@
                                        scheme: request.scheme) %>
 
 <article id="<%= dom_id(short_link) %>"
-         class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm"
+         class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm animate-fade-in"
          data-controller="history-recorder"
          data-history-recorder-slug-value="<%= short_link.slug %>"
          data-history-recorder-target-value="<%= short_link.target_url %>"
