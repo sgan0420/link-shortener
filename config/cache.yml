@@ -12,5 +12,6 @@ test:
   <<: *default
 
 production:
-  database: cache
+  # Single-DB setup — solid_cache_entries lives in the primary database.
+  # See docs/WIKI.md §2.8.
   <<: *default

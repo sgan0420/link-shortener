@@ -10,8 +10,7 @@ test:
 
 production:
   adapter: solid_cable
-  connects_to:
-    database:
-      writing: cable
+  # Single-DB setup — solid_cable_messages lives in the primary
+  # database alongside the app tables. See docs/WIKI.md §2.8.
   polling_interval: 0.1.seconds
   message_retention: 1.day

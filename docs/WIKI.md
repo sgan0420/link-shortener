@@ -91,11 +91,15 @@ The geolocation provider is **ipapi.co** — free, no signup, HTTPS on the free 
 
 With `SOLID_QUEUE_IN_PUMA=true`, Puma worker threads and Solid Queue's polling fibers share the same Active Record pool. We compensate via `pool: RAILS_MAX_THREADS + 5` (effective default 15). If web latency starts competing with job throughput, the next step is extracting `bin/jobs` as a separate Render service.
 
-### 2.8 Collapsed Solid trifecta on the free tier
+### 2.8 Single-DB Solid trifecta on the free tier
 
-Rails 8.1 ships Solid Queue / Cache / Cable as separate logical databases — the generator's `production` block in `database.yml` configures four independent connections. The Render free tier gives us exactly one physical Postgres, so the four logical DBs all resolve to the same `DATABASE_URL` (via `CACHE_DATABASE_URL` / `QUEUE_DATABASE_URL` / `CABLE_DATABASE_URL` env vars wired through `render.yaml`). The table namespaces (`solid_queue_*`, `solid_cache_entries`, `solid_cable_messages`) keep them disjoint inside the shared physical DB.
+Rails 8.1 ships Solid Queue / Cache / Cable wired to *separate* logical databases by default — the generator's `production` block in `database.yml` configures four independent connections, each with its own `migrations_paths` and `schema_migrations` table. That works well when each logical DB maps to its own physical Postgres.
 
-A budgeted production deployment would point each env var at its own physical Postgres instance — separate machines for queue / cache / cable isolates noisy-neighbor effects (e.g. a click-write spike doesn't slow down job pickup latency). The application code doesn't change; only the env wiring.
+The Render free tier gives us exactly one physical Postgres. Pointing all four logical DBs at it via separate URLs *seems* like it should work, but breaks subtly: the four connections end up sharing one `schema_migrations` table, so as soon as the primary's migrations land, the trifecta's schema-file loaders see "all versions present" and skip — leaving `solid_queue_*`, `solid_cache_entries`, and `solid_cable_messages` uncreated. Solid Queue then crashes on first job enqueue.
+
+The fix for this scope is to drop the multi-DB pretense and put the trifecta tables in the primary database with everything else. Concretely: `database.yml` has one `production:` block (just `url: DATABASE_URL`), `cable.yml` and `cache.yml` drop their `connects_to` / `database:` overrides, `production.rb` drops `config.solid_queue.connects_to`, and the three `db/*_schema.rb` files were converted into real migrations under `db/migrate/` so they participate in the unified `schema_migrations` tracking.
+
+What this trades away: noisy-neighbor isolation. A click-write spike now lands in the same physical Postgres as job pickup queries, so queue latency can rise under heavy write load. A budgeted production deployment would split the trifecta back out — application code doesn't change, only `database.yml` and `render.yaml`.
 
 ---
 

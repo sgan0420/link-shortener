@@ -84,26 +84,12 @@ test:
 # Read https://guides.rubyonrails.org/configuring.html#configuring-a-database
 # for a full overview on how database connection configuration can be specified.
 #
-# Rails 8.1 split the Solid trifecta into separate logical DBs. On the
-# Render free tier there's exactly one physical Postgres, so all four
-# resolve to the same URL — the Solid tables (solid_queue_*,
-# solid_cache_*, solid_cable_*) coexist with our app tables in one DB
-# without collisions because they're disjoint namespaces. A budgeted
-# production deployment would point each logical DB at a separate
-# physical instance (see docs/WIKI.md §2.8).
+# Single-DB production on the Render free tier (see docs/WIKI.md §2.8).
+# The Solid trifecta lives in the same physical Postgres as the app
+# tables; namespaces (solid_queue_*, solid_cache_entries,
+# solid_cable_messages) keep them disjoint. A budgeted production
+# deployment would split each into its own instance — application code
+# unchanged, just env wiring.
 production:
-  primary:
-    <<: *default
-    url: <%= ENV["DATABASE_URL"] %>
-  cache:
-    <<: *default
-    url: <%= ENV["CACHE_DATABASE_URL"] %>
-    migrations_paths: db/cache_migrate
-  queue:
-    <<: *default
-    url: <%= ENV["QUEUE_DATABASE_URL"] %>
-    migrations_paths: db/queue_migrate
-  cable:
-    <<: *default
-    url: <%= ENV["CABLE_DATABASE_URL"] %>
-    migrations_paths: db/cable_migrate
+  <<: *default
+  url: <%= ENV["DATABASE_URL"] %>
