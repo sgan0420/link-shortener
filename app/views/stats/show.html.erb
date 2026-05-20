@@ -13,6 +13,9 @@
          title="<%= @short_link.target_url %>">
         <%= presenter.display_target %>
       </p>
+      <p class="mt-1 truncate text-sm text-slate-600">
+        <%= presenter.title_label %>
+      </p>
     </div>
     <%= link_to "← Shorten another", root_path,
                 class: "shrink-0 text-sm text-slate-500 hover:text-slate-900" %>
