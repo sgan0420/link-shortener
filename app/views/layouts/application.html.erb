@@ -11,9 +11,7 @@
 
     <%= yield :head %>
 
-    <link rel="icon" href="/icon.png" type="image/png">
-    <link rel="icon" href="/icon.svg" type="image/svg+xml">
-    <link rel="apple-touch-icon" href="/icon.png">
+    <%= tag.link rel: "icon", href: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔗</text></svg>" %>
 
     <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
@@ -22,9 +20,7 @@
   <body class="h-full flex flex-col">
     <header class="border-b bg-white">
       <div class="mx-auto max-w-3xl px-6 py-4 flex items-center justify-between">
-        <%= link_to root_path, class: "text-lg font-semibold tracking-tight" do %>
-          <span aria-hidden="true">🔗</span> Link Shortener
-        <% end %>
+        <%= link_to "Link Shortener", root_path, class: "text-lg font-semibold tracking-tight" %>
         <%= link_to "My links", my_links_path,
                     class: "text-sm text-slate-500 hover:text-slate-900" %>
       </div>
