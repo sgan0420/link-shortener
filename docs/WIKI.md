@@ -2,6 +2,39 @@
 
 The "brief Wiki" the assessment brief asks for. Source-of-truth design context for the URL shortener. The longer-form architectural rationale lives in [`docs/SPECIFICATIONS.md`](./SPECIFICATIONS.md); this file is shorter and focused on the questions the brief calls out: short URL path scheme, limitations, workarounds, scalability, security, and PII.
 
+## Implementation patterns
+
+Thin Rails controllers dispatch into one of four single-purpose layers, each in its own `app/` subfolder:
+
+- **Services** (`app/services/`) — `.call`-style entry points that own business logic and raise typed errors. `UrlShortener`, `TitleFetcher`, `GeolocationService`.
+- **Models** (`app/models/`) — `ShortLink`, `Click`. Validations + AR plumbing; no formatting, no aggregations.
+- **Query objects** (`app/queries/`) — `ShortLinkStatsQuery`, `RecentClicksQuery`. All non-trivial SQL lives here so models stay slim.
+- **Presenters** (`app/presenters/`) — `ShortLinkPresenter`, `ClickPresenter`. View-layer formatting (truncation, hash masking, timestamp strings) without polluting models or templates.
+
+Async work (`app/jobs/`) orchestrates services and broadcasts.
+
+## Spec coverage at a glance
+
+Every brief requirement and L3 extra-credit criterion mapped to where it's addressed. Sections are this file unless noted.
+
+| # | Brief requirement | Where it lives |
+|---|---|---|
+| 1 | Deployed web interface with target-URL form field | `app/views/short_links/new.html.erb` · `app/views/short_links/_form.html.erb` · live at https://link-shortener-x7ry.onrender.com |
+| 2 | Returns Short URL + Target URL + Title tag | `app/views/short_links/_result_card.html.erb` (Turbo Stream from `app/controllers/short_links_controller.rb#create`); async title fetch — §1 |
+| 3 | Short URL publicly shareable + accessible | `app/controllers/redirects_controller.rb` (`GET /:slug` → 302, no auth) |
+| 4 | Slug ≤ 15 chars | §1 (7-char nanoid); enforced by model (`length: { maximum: 15 }`) + router constraint |
+| 5 | Multiple short URLs can share one target URL | §1 — `target_url` has no uniqueness constraint; each `UrlShortener.call` generates an independent slug |
+| 6 | Usage report: clicks + geolocation + timestamp | `app/views/stats/show.html.erb` driven by `ShortLinkStatsQuery` + `RecentClicksQuery`; click capture is `app/jobs/record_click_job.rb` |
+| 7 | Brief wiki: short URL path solution + limitations + workarounds | This file — §1 (solution) and §2 (limitations/workarounds) |
+
+| L3 extra credit | Where it lives |
+|---|---|
+| Strategic design patterns (service / query / presenter / decorator) | "Implementation patterns" above + §3 |
+| Error and edge-case handling | `TitleFetcher` SSRF + body cap + timeouts; `FetchTitleJob` retry/discard chain; controller rescue branches; §2.5 click loss vs duplicate trade-off |
+| Scalability considerations | §3 (4-step growth path: Solid Cache lookup → split worker → click rollup → read replicas) |
+| Security considerations | §4 (threat/mitigation table) — URL validation, SSRF guard, rate limits, CSP + HSTS, salted IP hashing |
+| Advanced UI components / popular frameworks | Hotwire (Turbo Stream broadcasts for live title swap) + Stimulus controllers (`history_recorder`, `history_list`) + Tailwind v4 |
+
 ---
 
 ## 1. Short URL path: the chosen solution
@@ -28,6 +61,8 @@ UrlShortener.call(target_url:)
 ```
 
 The DB unique index is the source of truth; the app-level retry exists to keep UX clean during the narrow race window between two concurrent inserts picking the same nanoid.
+
+Each `UrlShortener.call` generates a fresh slug independently, and `short_links.target_url` has no uniqueness constraint — so two short URLs can legitimately point to the same target (per spec item 5). This is the right shape for a shortener: a marketing team and an end user can each shorten the same canonical URL without one shadowing the other.
 
 ---
 
